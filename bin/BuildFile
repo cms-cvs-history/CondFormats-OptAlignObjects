@@ -1,0 +1,12 @@
+<use name=CondFormats/OptAlignObjects>
+<use name=CondCore/DBCommon>
+<use name=CondCore/IOVService>
+<use name=CondCore/MetaDataService>
+<use name=CondCore/DBCommon>
+<use name=boost>
+<use name=clhep>
+<use name=DataSvc>
+<use name=RelationalAccess>
+<use name=Foundation/SealUtil>
+
+<bin file="csc_z_sens_db_loader.cpp"> </bin>

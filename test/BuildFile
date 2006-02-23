@@ -1,22 +1,5 @@
-<environment>
-  <use name=clhep>
-  <use name=CondFormats/DataRecord>
-  <use name=CondFormats/OptAlignObjects>
-  <use name=CondCore/DBCommon>
-  <use name=CondCore/ESSources>
-  <use name=CondCore/IOVService>
-  <use name=CondCore/MetaDataService>
-  <library file=stubs/OptAlignTestAnalyzer.cc name=OptAlignTestAnalyzer>
-    <flags SEAL_PLUGIN_NAME="OptAlignTestAnalyzer">
-  </library>
-</environment>
-
-<environment>
-  <use name=CondFormats/OptAlignObjects>
-  <use name=CondCore/DBCommon>
-  <use name=CondCore/IOVService>
-  <use name=CondCore/MetaDataService>
-  <use name=CondCore/ESSources>
-  <use name=clhep>
-  <bin file=testOptAlignWriter.cc></bin>
-</environment>
+<use name=FWCore/Framework>
+<use name=FWCore/ParameterSet>
+<use name=CondFormats/OptAlignObjects>
+<use name=boost>
+<bin file=testReader.cpp></bin>
