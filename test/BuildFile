@@ -1,5 +1,17 @@
 <use name=FWCore/Framework>
 <use name=FWCore/ParameterSet>
 <use name=CondFormats/OptAlignObjects>
+<use name=CondFormats/DataRecord>
+<use name=CondCore/IOVService>
+<use name=CondCore/MetaDataService>
+<use name=CondCore/DBCommon>
 <use name=boost>
 <bin file=testReader.cpp></bin>
+<bin file=testOptAlignWriter.cpp></bin>
+  <library file=stubs/OptAlignTestAnalyzer.cc name=OptAlignTestAnalyzer>
+    <flags SEAL_PLUGIN_NAME="OptAlignTestAnalyzer">
+  </library>
+
+  <library file=stubs/CSCZSensorAnalyzer.cc name=CSCZSensorAnalyzer>
+    <flags SEAL_PLUGIN_NAME="CSCZSensorAnalyzer">
+  </library>

@@ -75,7 +75,7 @@ int  main( int argc, char** argv )
   opt.required = false;
   ops.push_back(opt);
   opt.flag = "-t";
-  opt.property = "type";
+  opt.property = "type";//std::string tok1=w.write<OpticalAlignments>(oa,"OpticalAlignments");
   opt.type = pool::CommandOptions::Option::STRING;
   opt.helpEntry = "the type or table analogue";
   opt.required = true;
@@ -163,12 +163,12 @@ int  main( int argc, char** argv )
 		stringData.clear();
 		oacfr.getData(stringData);
 		if ( stringData.size() > 0 ) {
-		  std::cout << "stringData.size()=" << stringData.size() << std::endl;
+		  //std::cout << "stringData.size()=" << stringData.size() << std::endl;
 		  if ( types.size() != stringData.size() ) {
 		    std::cout << "Error:  line does not have enough data." << std::endl;
-		    std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;		  
+		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;		  
 		  } else {
-		    std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;
+		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;
 		    for ( size_t i = 0; i < types.size(); i++ ) {
 		      std::istringstream st( stringData[i] );
 		      
@@ -218,7 +218,7 @@ int  main( int argc, char** argv )
 	      loader->loadAuthenticationService( cond::Env );
 	      loader->loadMessageService( cond::Error );
 	      cond::DBSession* session=new cond::DBSession(theConnectionString);
-	      session->setCatalog("file:CSCPoolCatalog.xml");
+	      session->setCatalog("file:PoolFileCatalog.xml");
 	      session->connect(cond::ReadWriteCreate);
 	      cond::DBWriter pw(*session, theType);
 	      cond::DBWriter iovw(*session, "IOV");
@@ -226,13 +226,14 @@ int  main( int argc, char** argv )
 	      session->startUpdateTransaction();
 	      std::string tok=pw.markWrite<CSCZSensors>(csczs);
 	      initiov->iov.insert(std::make_pair(1,tok));
-	      iovw.markWrite<cond::IOV>(initiov);
+	      std::string iovtok = iovw.markWrite<cond::IOV>(initiov);
 	      session->commit();
+	      session->disconnect();
 	      cond::MetaData metadata_svc(theConnectionString, *loader);
 	      metadata_svc.connect();
-	      metadata_svc.addMapping(theCalibrationName, tok);
+	      metadata_svc.addMapping(theCalibrationName, iovtok);
 	      metadata_svc.disconnect();
-	      std::cout << "Wrote " << csczs->cscZSens_.size() << " sensor data to " << theConnectionString;
+	      std::cout << "Wrote " <<  (csczs->cscZSens_).size() << " sensor data to " << theConnectionString;
 	      std::cout << " with token " << tok << " as name " << theCalibrationName  << std::endl;
 	      delete session;
 	    } // end else of if names.size=types.size

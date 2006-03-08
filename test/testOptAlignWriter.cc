@@ -1,18 +1,25 @@
 #include "CondCore/DBCommon/interface/DBWriter.h"
 #include "CondFormats/OptAlignObjects/interface/OpticalAlignments.h"
+#include "CondFormats/OptAlignObjects/interface/OAQuality.h"
 #include "CondCore/IOVService/interface/IOV.h"
 #include "SealKernel/Service.h"
 #include "POOLCore/POOLContext.h"
 #include "SealKernel/Context.h"
 #include "CondCore/MetaDataService/interface/MetaData.h"
 
+#include "CondCore/DBCommon/interface/DBSession.h"
+#include "CondCore/DBCommon/interface/Exception.h"
+#include "CondCore/DBCommon/interface/ServiceLoader.h"
+#include "CondCore/DBCommon/interface/ConnectMode.h"
+#include "CondCore/DBCommon/interface/MessageLevel.h"
+
 #include <string>
 #include <iostream>
 int main(){
-  pool::POOLContext::loadComponent( "SEAL/Services/MessageService" );
-  pool::POOLContext::setMessageVerbosityLevel( seal::Msg::Info );
-  cond::DBWriter w(std::string("sqlite_file:test.db"));
-  w.startTransaction();
+//   pool::POOLContext::loadComponent( "SEAL/Services/MessageService" );
+//   pool::POOLContext::setMessageVerbosityLevel( seal::Msg::Info );
+//   cond::DBWriter w(std::string("sqlite_file:test.db"));
+//   w.startTransaction();
   
   OpticalAlignments* oa(new OpticalAlignments);
   OpticalAlignInfo oainfo;
@@ -21,11 +28,11 @@ int main(){
 
   lValue.value_ = 1.0123;
   lValue.error_ = 0.0123;
-  lValue.iState_ = 'u';
+  lValue.qual_ = oa_unknown;
 
   aValue.value_ = 1.0123;
   aValue.error_ = 0.00123;
-  aValue.iState_ = 'u';
+  aValue.qual_ = oa_unknown;
 
 //   x.value_ = 1.0123;
 //   y.value_ = 1.0123;
@@ -33,18 +40,18 @@ int main(){
 //   x.error_ = 0.0123;
 //   y.error_ = 0.0123;
 //   z.error_ = 0.0123;
-//   x.iState_ = 'u';
-//   y.iState_ = 'u';
-//   z.iState_ = 'u';
+//   x.qual_ = oa_unknown;
+//   y.qual_ = oa_unknown;
+//   z.qual_ = oa_unknown;
 //   xAng.value_ = 1.0123;
 //   yAng.value_ = 1.0123;
 //   zAng.value_ = 1.0123;
 //   xAng.error_ = 0.00123;
 //   yAng.error_ = 0.00123;
 //   zAng.error_ = 0.00123;
-//   xAng.iState_='u';
-//   yAng.iState_='u';
-//   zAng.iState_='u';
+//   xAng.qual_=oa_unknown;
+//   yAng.qual_=oa_unknown;
+//   zAng.qual_=oa_unknown;
 
   oainfo.x_ = lValue;
   oainfo.y_ = lValue;
@@ -60,27 +67,60 @@ int main(){
   oa->opticalAlignments_.push_back(oainfo);
   oa->opticalAlignments_.push_back(oainfo);
   std::cout << "done with push_back of oainfo to oa" << std::endl;
-  std::string tok1=w.write<OpticalAlignments>(oa,"OpticalAlignments");
-  std::cout << "done writing" << std::endl;
+
+	      pool::POOLContext::loadComponent( "SEAL/Services/MessageService" );
+	      pool::POOLContext::setMessageVerbosityLevel( seal::Msg::Info );
+	      cond::ServiceLoader* loader=new cond::ServiceLoader;
+	      ::putenv("CORAL_AUTH_USER=me");
+	      ::putenv("CORAL_AUTH_PASSWORD=mypass");
+	      loader->loadAuthenticationService( cond::Env );
+	      loader->loadMessageService( cond::Error );
+	      cond::DBSession* session=new cond::DBSession("sqlite_file:test.db");
+	      session->setCatalog("file:PoolFileCatalog.xml");
+	      session->connect(cond::ReadWriteCreate);
+
+	      cond::DBWriter pw(*session, "OpticalAlignments");
+	      cond::DBWriter iovw(*session, "IOV");
+	      cond::IOV* initiov=new cond::IOV;
+	      session->startUpdateTransaction();
+	      //	      std::string tok=pw.markWrite<CSCZSensors>(csczs);
+	      std::string tok1 = pw.markWrite<OpticalAlignments>(oa);
 
   OpticalAlignments* oatoo=new OpticalAlignments;
   oatoo->opticalAlignments_.push_back(oainfo);
-  std::string tok2=w.write<OpticalAlignments>(oatoo,"OpticalAlignments");
-  cond::IOV* initiov=new cond::IOV;
-  initiov->iov.insert(std::make_pair(1,tok1));
-  initiov->iov.insert(std::make_pair(2,tok2));
-  std::string iovtok1=w.write<cond::IOV>(initiov, "IOV");
+  std::string tok2=pw.markWrite<OpticalAlignments>(oatoo);
 
-  w.commitTransaction();
+	      initiov->iov.insert(std::make_pair(1,tok1));
+	      initiov->iov.insert(std::make_pair(3,tok2));
+	      std::string iovtok = iovw.markWrite<cond::IOV>(initiov);
+	      session->commit();
+	      session->disconnect();
+	      cond::MetaData metadata_svc("sqlite_file:test.db", *loader);
+	      metadata_svc.connect();
+	      metadata_svc.addMapping("OpticalAlignmentsTry3", iovtok);
+	      metadata_svc.disconnect();
+	      std::cout << "Wrote OpticalAlignments to sqlite_file:test.db";
+	      std::cout << " with token " << iovtok << " as OpticalAlignmentsTry3 "  << std::endl;
+	      delete session;
 
-  w.startTransaction();
-  cond::IOV* bestiov=new cond::IOV;
-  bestiov->iov.insert(std::make_pair(10,tok1));
-  bestiov->iov.insert(std::make_pair(20,tok2));
-  std::string iovtok2=w.write<cond::IOV>(bestiov, "IOV");
-  w.commitTransaction();
+//   std::string tok1=w.write<OpticalAlignments>(oa,"OpticalAlignments");
+//   std::cout << "done writing" << std::endl;
 
-  cond::MetaData metadata_svc("sqlite_file:test.db");
-  metadata_svc.addMapping("OpticalAlignmentsTry3", iovtok1);
-  metadata_svc.addMapping("OpticalAlignmentsTry4", iovtok2);
+//   cond::IOV* initiov=new cond::IOV;
+//   initiov->iov.insert(std::make_pair(1,tok1));
+//   initiov->iov.insert(std::make_pair(2,tok2));
+//   std::string iovtok1=w.write<cond::IOV>(initiov, "IOV");
+
+//   w.commitTransaction();
+
+//   w.startTransaction();
+//   cond::IOV* bestiov=new cond::IOV;
+//   bestiov->iov.insert(std::make_pair(10,tok1));
+//   bestiov->iov.insert(std::make_pair(20,tok2));
+//   std::string iovtok2=w.write<cond::IOV>(bestiov, "IOV");
+//   w.commitTransaction();
+
+//   cond::MetaData metadata_svc("sqlite_file:test.db");
+//   metadata_svc.addMapping("OpticalAlignmentsTry3", iovtok1);
+//   metadata_svc.addMapping("OpticalAlignmentsTry4", iovtok2);
 }
