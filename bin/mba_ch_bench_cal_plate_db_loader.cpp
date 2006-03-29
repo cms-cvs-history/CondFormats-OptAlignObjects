@@ -17,6 +17,7 @@
 #include "CondCore/DBCommon/interface/ServiceLoader.h"
 #include "CondCore/DBCommon/interface/ConnectMode.h"
 #include "CondCore/DBCommon/interface/MessageLevel.h"
+#include "FWCore/Framework/interface/IOVSyncValue.h"
 
 #include "CondFormats/OptAlignObjects/interface/OptAlignCSCFileReader.h"
 #include "CondFormats/OptAlignObjects/interface/MBAChBenchCalPlate.h"
@@ -211,7 +212,7 @@ int  main( int argc, char** argv )
 	      cond::IOV* initiov=new cond::IOV;
 	      session->startUpdateTransaction();
 	      std::string tok=pw.markWrite<MBAChBenchCalPlate>(mbachbenchcalplate);
-	      initiov->iov.insert(std::make_pair(1,tok));
+	      initiov->iov.insert(std::make_pair(edm::IOVSyncValue::endOfTime().eventID().run(),tok));
 	      std::string iovtok = iovw.markWrite<cond::IOV>(initiov);
 	      session->commit();
 	      session->disconnect();

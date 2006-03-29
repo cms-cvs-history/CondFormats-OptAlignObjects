@@ -17,6 +17,7 @@
 #include "CondCore/DBCommon/interface/ServiceLoader.h"
 #include "CondCore/DBCommon/interface/ConnectMode.h"
 #include "CondCore/DBCommon/interface/MessageLevel.h"
+#include "FWCore/Framework/interface/IOVSyncValue.h"
 
 #include "CondFormats/OptAlignObjects/interface/OptAlignCSCFileReader.h"
 #include "CondFormats/OptAlignObjects/interface/MBAChBenchSurveyPlate.h"
