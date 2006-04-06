@@ -230,15 +230,11 @@ int  main( int argc, char** argv )
 
       return 0;
     }
-  }  catch (const seal::Exception& e){
-    std::cout << "ERROR: " << e.what() << std::endl;
-    return 1;
-  } catch ( std::exception& se ) {
-    std::cout << se.what() << std::endl;
   } catch(const cond::Exception& er){
     std::cout<<er.what()<<std::endl;
-    //delete loader;
     exit(-1);
+  } catch ( std::exception& se ) {
+    std::cout << se.what() << std::endl;
   } catch ( ... ) {
     std::cout << "some other error" << std::endl;
   }
