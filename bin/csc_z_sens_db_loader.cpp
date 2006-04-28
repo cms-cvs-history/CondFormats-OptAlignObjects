@@ -173,9 +173,12 @@ int  main( int argc, char** argv )
 		      std::istringstream st( stringData[i] );
 		      
 		      if ( names[i] == "" ) {
-		      } else if ( names[i] == "Sensornumber" ) {
+			// do nothing
+		      } else if ( names[i] == "Sensor_type" ) {
+			st >> csczsd.sensorType_;
+		      } else if ( names[i] == "Sensor_number" ) {
 			st >> csczsd.sensorNo_;
-		      } else if ( names[i] == "MElayer" ) {
+		      } else if ( names[i] == "ME_layer" ) {
 			st >> csczsd.meLayer_;
 		      } else if ( names[i] == "Logical_Alignment_Name" ) {
 			st >> csczsd.logicalAlignmentName_;
@@ -199,7 +202,7 @@ int  main( int argc, char** argv )
 			st >> csczsd.normIntercept_;
 		      } else if ( names[i] == "Norm_Intercept_Error" ) {
 			st >> csczsd.normInterceptError_;
-		      } else if ( names[i] == "Shifts" ) {
+		      } else if ( names[i] == "Shifts_due_to_shims_etc" ) {
 			st >> csczsd.shifts_;
 		      } 
 		    } // end for loop for each of the data lines.
