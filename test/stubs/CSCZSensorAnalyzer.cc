@@ -13,7 +13,7 @@
 //
 // Original Author:  Mike Case
 //         Created:  Mon Jan 17 11:47:40 CET 2006
-// $Id: CSCZSensorAnalyzer.cc,v 1.1 2006/01/26 13:44:15 case Exp $
+// $Id: CSCZSensorAnalyzer.cc,v 1.1 2006/03/08 17:14:52 case Exp $
 //
 //
 
@@ -61,6 +61,7 @@ using namespace std;
     //  just iterate over all of them...
     const CSCZSensors* csczs = csczsHandle.product();
 
+    std::cout << "sensorType ";
     std::cout << "sensorNo ";
     std::cout << "meLayer ";
     std::cout << "logicalAlignmentName ";
@@ -79,6 +80,7 @@ using namespace std;
 
     for ( std::vector<CSCZSensorData>::const_iterator vit = csczs->cscZSens_.begin();
 	  vit != csczs->cscZSens_.end(); ++vit ) {
+      std::cout << vit->sensorType_ << " ";
       std::cout << vit->sensorNo_ << " " << vit->meLayer_ << " ";
       std::cout << vit->logicalAlignmentName_ << " " << vit->cernDesignator_ << " ";
       std::cout << vit->cernBarcode_ << " " << vit->absSlope_ << " ";
