@@ -1,13 +1,13 @@
-#include "POOLCore/CommandOptions.h"
+/**
+ * This is an example application for reading ASCII files into memory and writing
+ * them out 
+ **/
 
+// Command line options from Pool and Seal
+#include "POOLCore/CommandOptions.h"
 #include "SealBase/ShellEnvironment.h"
 
-#include "boost/spirit/core.hpp"
-#include "boost/any.hpp"
-
-#include<iostream>
-// #include<istream>
-// #include<fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <stdexcept>
@@ -19,7 +19,12 @@
 #include "CondCore/DBCommon/interface/MessageLevel.h"
 #include "FWCore/Framework/interface/IOVSyncValue.h"
 
+// OptAlignCSCFileReader reads comma separated ASCII files 
+// and provides them as a vector of strings.
 #include "CondFormats/OptAlignObjects/interface/OptAlignCSCFileReader.h"
+
+// CSCZSensors are the objects being written into the framework Pool
+// format. 
 #include "CondFormats/OptAlignObjects/interface/CSCZSensors.h"
 #include "CondCore/DBCommon/interface/DBWriter.h"
 #include "CondFormats/OptAlignObjects/interface/OpticalAlignments.h"
@@ -30,7 +35,6 @@
 #include "CondCore/MetaDataService/interface/MetaData.h"
 
 #include <vector>
-// #include <sstream>
 #include <map>
 
 namespace std { } using namespace std;
@@ -45,12 +49,6 @@ int  main( int argc, char** argv )
   opt.helpEntry = "the source text source file name";
   opt.required = true;
   ops.push_back(opt);
-  //   opt.flag = "-p";
-  //   opt.property = "specParConfig";
-  //   opt.type = pool::CommandOptions::Option::STRING;
-  //   opt.helpEntry = "the specPar XML configuration file name";
-  //   opt.required = true;
-  //   ops.push_back(opt);
   opt.flag = "-c";
   opt.property = "connectionString";
   opt.type = pool::CommandOptions::Option::STRING;
@@ -76,19 +74,11 @@ int  main( int argc, char** argv )
   opt.required = false;
   ops.push_back(opt);
   opt.flag = "-t";
-  opt.property = "type";//std::string tok1=w.write<OpticalAlignments>(oa,"OpticalAlignments");
+  opt.property = "type";
   opt.type = pool::CommandOptions::Option::STRING;
   opt.helpEntry = "the type or table analogue";
   opt.required = true;
   ops.push_back(opt);
-//   //not used right now.
-//   opt.flag = "-debug";
-//   opt.property = "debug";
-//   opt.type = pool::CommandOptions::Option::BOOLEAN;
-//   opt.required = false;
-//   opt.helpEntry = "enable the verbose mode";
-//   ops.push_back(opt);  
-  // help (only) 
   opt.flag = "-h";
   opt.property = "help";
   opt.type = pool::CommandOptions::Option::BOOLEAN;
@@ -139,79 +129,142 @@ int  main( int argc, char** argv )
       OptAlignCSCFileReader oacfr( theSourceFile );
       std::vector<std::string> names, types;
       oacfr.next();
-      //      std::cout << "1" << std::endl;
       if ( oacfr.getData(names) ) {
 	if ( oacfr.next() ) {
-	  //	  std::cout << "2" << std::endl;
 	  if ( oacfr.getData(types) ) {
-	    //	    std::cout << "3" << std::endl;
 	    if ( names.size() != types.size() ) { 
 	      std::cout << "Invalid file header.  Need names and types." << std::endl;
 	      std::cout << "names.size() = " << names.size() << "  types.size() = " << types.size() << std::endl;
 	    } else {
-	      // 	    std::cout << "name-type: " ;
-	      // 	    for ( size_t i = 0 ; i < names.size() ; i++ ) {
-	      // 	      std::cout << names[i] << "-" << types[i] << ", ";
-	      // 	    }
-	      // 	    std::cout << std::endl << std::endl;
 	      std::vector<std::string> stringData;
-	      //	      std::vector<double> dblData;
-
-
 	      CSCZSensors* csczs = new CSCZSensors;
-
 	      while ( oacfr.next() ) {
 		stringData.clear();
 		oacfr.getData(stringData);
-	      CSCZSensorData csczsd;
+		CSCZSensorData csczsd;
 		if ( stringData.size() > 0 ) {
-		  //std::cout << "stringData.size()=" << stringData.size() << std::endl;
 		  if ( types.size() != stringData.size() ) {
 		    std::cout << "Error:  line does not have enough data." << std::endl;
-		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;		  
 		  } else {
-		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;
-
 		    for ( size_t i = 0; i < types.size(); i++ ) {
-
+		      // used to convert strings to numbers.
 		      std::istringstream st( stringData[i] );
-		      
 		      if ( names[i] == "" ) {
-			// do nothing
+			// do nothing if there is no name! => that column is NOT going into the DB.
+			// since it is not processed here.
 		      } else if ( names[i] == "Sensor_type" ) {
-			std::string tstr;
+			// for each data-member of your object, you need an if like this.
+			if ( types[i] == "CHAR" ) {
+			  std::string tstr;
 			  while ( !st.eof() ) {
 			    st >> tstr;
 			    csczsd.sensorType_ = csczsd.sensorType_ + ' ' + tstr;
 			  }
+			} else {
+			  std::cout << "Sensor_type should be CHAR" << endl;
+			}
 		      } else if ( names[i] == "Sensor_number" ) {
-			st >> csczsd.sensorNo_;
+			if ( types[i] == "INT" ) {
+			  st >> csczsd.sensorNo_;
+			} else {
+			  std::cout << "Sensor_number should be INT" << endl;
+			}
 		      } else if ( names[i] == "ME_layer" ) {
-			st >> csczsd.meLayer_;
+			if ( types[i] == "CHAR" ) {
+			  std::string tstr;
+			  while ( !st.eof() ) {
+			    st >> tstr;
+			    csczsd.meLayer_ = csczsd.meLayer_ + ' ' + tstr;
+			  }
+			} else {
+			  std::cout << "ME_layer should be CHAR" << endl;
+			}
 		      } else if ( names[i] == "Logical_Alignment_Name" ) {
-			st >> csczsd.logicalAlignmentName_;
+			if ( types[i] == "CHAR" ) {
+			  std::string tstr;
+			  while ( !st.eof() ) {
+			    st >> tstr;
+			    csczsd.logicalAlignmentName_ = csczsd.logicalAlignmentName_ + ' ' + tstr;
+			  }
+			} else {
+			  std::cout << "Logical_Alignment_Name should be CHAR" << endl;
+			}
 		      } else if ( names[i] == "CERN_Designator" ) {
-			st >> csczsd.cernDesignator_;
+			if ( types[i] == "CHAR" ) {
+			  std::string tstr;
+			  while ( !st.eof() ) {
+			    st >> tstr;
+			    csczsd.cernDesignator_ = csczsd.cernDesignator_ + ' ' + tstr;
+			  }
+			} else {
+			  std::cout << "CERN_Designator should be CHAR" << endl;
+			}
 		      } else if ( names[i] == "CERN_Barcode" ) {
-			st >> csczsd.cernBarcode_;
+			if ( types[i] == "CHAR" ) {
+			  std::string tstr;
+			  while ( !st.eof() ) {
+			    st >> tstr;
+			    csczsd.cernBarcode_ = csczsd.cernBarcode_ + ' ' + tstr;
+			  }
+			} else {
+			  std::cout << "CERN_Barcode should be CHAR" << endl;
+			}
 		      } else if ( names[i] == "Abs_Slope" ) {
-			st >> csczsd.absSlope_;
+			if ( types[i] == "FLOAT" ) {
+			  st >> csczsd.absSlope_;
+			} else {
+			  std::cout << "Abs_Slope should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Abs_Slope_Error" ) {
-			st >> csczsd.absSlopeError_;
+			if ( types[i] == "FLOAT" ) {
+			  st >> csczsd.absSlopeError_;
+			} else {
+			  std::cout << "Abs_Slope_Error should be FLOAT" << endl;
+			}
+
 		      } else if ( names[i] == "Norm_Slope" ) {
-			st >> csczsd.normSlope_;
+			if ( types[i] == "FLOAT" ) {
+			  st >> csczsd.normSlope_;
+			} else {
+			  std::cout << "Norm_Slope should be FLOAT" << endl;
+			}
+
 		      } else if ( names[i] == "Norm_Slope_Error" ) {
+			if ( types[i] == "FLOAT" ) {
 			st >> csczsd.normSlopeError_;
+			} else {
+			  std::cout << "Norm_Slope_Error should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Abs_Intercept" ) {
+			if ( types[i] == "FLOAT" ) {
 			st >> csczsd.absIntercept_;
+			} else {
+			  std::cout << "Abs_Intercept should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Abs_Intercept_Error" ) {
-			st >> csczsd.absInterceptError_;
+			if ( types[i] == "FLOAT" ) {
+			  st >> csczsd.absInterceptError_;
+			} else {
+			  std::cout << "Abs_Intercep_Error should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Norm_Intercept" ) {
-			st >> csczsd.normIntercept_;
+			if ( types[i] == "FLOAT" ) {
+			  st >> csczsd.normIntercept_;
+			} else {
+			  std::cout << "Norm_Intercept should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Norm_Intercept_Error" ) {
+			if ( types[i] == "FLOAT" ) {
 			st >> csczsd.normInterceptError_;
+			} else {
+			  std::cout << "Norm_Intercept_Error should be FLOAT" << endl;
+			}
 		      } else if ( names[i] == "Shifts_due_to_shims_etc" ) {
+			if ( types[i] == "FLOAT" ) {
 			st >> csczsd.shifts_;
+			} else {
+			  std::cout << "Shifts_due_to_shims_etc should be FLOAT" << endl;
+			}
 		      } 
 		    } // end for loop for each of the data lines.
 		    stringData.clear();
