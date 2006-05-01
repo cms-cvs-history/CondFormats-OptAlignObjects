@@ -157,12 +157,13 @@ int  main( int argc, char** argv )
 	      std::vector<std::string> stringData;
 	      //	      std::vector<double> dblData;
 
-	      CSCZSensorData csczsd;
+
 	      CSCZSensors* csczs = new CSCZSensors;
 
 	      while ( oacfr.next() ) {
 		stringData.clear();
 		oacfr.getData(stringData);
+	      CSCZSensorData csczsd;
 		if ( stringData.size() > 0 ) {
 		  //std::cout << "stringData.size()=" << stringData.size() << std::endl;
 		  if ( types.size() != stringData.size() ) {
@@ -170,13 +171,19 @@ int  main( int argc, char** argv )
 		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;		  
 		  } else {
 		    //std::cout << "types.size()=" << types.size() << "  stringData.size()=" << stringData.size() << std::endl;
+
 		    for ( size_t i = 0; i < types.size(); i++ ) {
+
 		      std::istringstream st( stringData[i] );
 		      
 		      if ( names[i] == "" ) {
 			// do nothing
 		      } else if ( names[i] == "Sensor_type" ) {
-			st >> csczsd.sensorType_;
+			std::string tstr;
+			  while ( !st.eof() ) {
+			    st >> tstr;
+			    csczsd.sensorType_ = csczsd.sensorType_ + ' ' + tstr;
+			  }
 		      } else if ( names[i] == "Sensor_number" ) {
 			st >> csczsd.sensorNo_;
 		      } else if ( names[i] == "ME_layer" ) {
@@ -214,6 +221,9 @@ int  main( int argc, char** argv )
 		  std::cout << "Skipping blank line" << std::endl;
 		} // end if size()>0 else
 	      } // end while
+	      std::cout << "Filled " <<  (csczs->cscZSens_).size() << " sensor data to " << theConnectionString;
+	      std::cout << " ... " << std::endl;
+	      //	      std::cout << " string of first is: |" << csczs->cscZSens_[0].sensorType_ << "|" << std::endl;
 	      pool::POOLContext::loadComponent( "SEAL/Services/MessageService" );
 	      pool::POOLContext::setMessageVerbosityLevel( seal::Msg::Info );
 	      cond::ServiceLoader* loader=new cond::ServiceLoader;
@@ -231,6 +241,7 @@ int  main( int argc, char** argv )
 	      std::string tok=pw.markWrite<CSCZSensors>(csczs);
 	      unsigned long myTime=(unsigned long)edm::IOVSyncValue::endOfTime().eventID().run();
 	      //	      myIov->iov[mytime]=tk.tokenAsString();
+	      std::cout << "The end-of-time is " << myTime << std::endl;
 	      initiov->iov.insert(std::make_pair(myTime,tok));
 	      std::string iovtok = iovw.markWrite<cond::IOV>(initiov);
 	      session->commit();
@@ -239,8 +250,7 @@ int  main( int argc, char** argv )
 	      metadata_svc.connect();
 	      metadata_svc.addMapping(theCalibrationName, iovtok);
 	      metadata_svc.disconnect();
-	      std::cout << "Wrote " <<  (csczs->cscZSens_).size() << " sensor data to " << theConnectionString;
-	      std::cout << " with token " << tok << " as name " << theCalibrationName  << std::endl;
+	      std::cout << "Done with save, token " << tok << " as name " << theCalibrationName  << std::endl;
 	      delete session;
 	    } // end else of if names.size=types.size
 	  } // end if got types
