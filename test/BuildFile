@@ -5,6 +5,7 @@
 <use name=CondCore/IOVService>
 <use name=CondCore/MetaDataService>
 <use name=CondCore/DBCommon>
+<use name=CondCore/DBOutputService>
 <use name=boost>
 <bin file=testReader.cpp></bin>
 <bin file=testOptAlignWriter.cpp></bin>
@@ -15,3 +16,8 @@
   <library file=stubs/CSCZSensorAnalyzer.cc name=CSCZSensorAnalyzer>
     <flags SEAL_PLUGIN_NAME="CSCZSensorAnalyzer">
   </library>
+
+  <library file=stubs/CSCZSensorLoadSinglePayload.cc name=CSCZSensorLoadSinglePayload>
+    <flags SEAL_PLUGIN_NAME="CSCZSensorLoadSinglePayload">
+  </library>
+

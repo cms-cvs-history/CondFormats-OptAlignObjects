@@ -305,6 +305,7 @@ int  main( int argc, char** argv )
 	      metadata_svc.disconnect();
 	      std::cout << "Done with save, token " << tok << " as name " << theCalibrationName  << std::endl;
 	      delete session;
+	      delete loader;
 	    } // end else of if names.size=types.size
 	  } // end if got types
 	} // end if got names 
