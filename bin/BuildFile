@@ -16,7 +16,7 @@
 <use name=RelationalAccess>
 <use name=Foundation/SealUtil>
 
-<bin file="mba_ch_bench_cal_plate_db_loader.cpp"> </bin>
-<bin file="mba_ch_bench_survey_plate_db_loader.cpp"> </bin>
+#<bin file="mba_ch_bench_cal_plate_db_loader.cpp"> </bin>
+#<bin file="mba_ch_bench_survey_plate_db_loader.cpp"> </bin>
 
 
