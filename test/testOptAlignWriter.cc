@@ -23,11 +23,11 @@ int main(){
 
   lValue.value_ = 1.0123;
   lValue.error_ = 0.0123;
-  lValue.qual_ = oa_unknown;
+  lValue.quality_ = oa_unknown;
 
   aValue.value_ = 1.0123;
   aValue.error_ = 0.00123;
-  aValue.qual_ = oa_unknown;
+  aValue.quality_ = oa_unknown;
 
   oainfo.x_ = lValue;
   oainfo.y_ = lValue;
@@ -35,8 +35,8 @@ int main(){
   oainfo.angx_ = aValue;
   oainfo.angy_ = aValue;
   oainfo.angz_ = aValue;
-  oainfo.objectType_ = "plate";
-  oainfo.objectID_ = 1;
+  oainfo.type_ = "plate";
+  oainfo.ID_ = 1;
 
   std::cout << "done filling oainfo" << std::endl;
   oa->opticalAlignments_.push_back(oainfo);
@@ -64,11 +64,11 @@ int main(){
 
   lValue.value_ = 1.0234;
   lValue.error_ = 0.0234;
-  lValue.qual_ = oa_unknown;
+  lValue.quality_ = oa_unknown;
 
   aValue.value_ = 1.0234;
   aValue.error_ = 0.00234;
-  aValue.qual_ = oa_unknown;
+  aValue.quality_ = oa_unknown;
 
   oainfo.x_ = lValue;
   oainfo.y_ = lValue;
@@ -76,8 +76,8 @@ int main(){
   oainfo.angx_ = aValue;
   oainfo.angy_ = aValue;
   oainfo.angz_ = aValue;
-  oainfo.objectType_ = "plate";
-  oainfo.objectID_ = 1;
+  oainfo.type_ = "plate";
+  oainfo.ID_ = 1;
 
   OpticalAlignments* oatoo=new OpticalAlignments;
   oatoo->opticalAlignments_.push_back(oainfo);
