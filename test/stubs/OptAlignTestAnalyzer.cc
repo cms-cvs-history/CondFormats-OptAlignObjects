@@ -13,7 +13,7 @@
 //
 // Original Author:  Mike Case
 //         Created:  Mon Jan 17 11:47:40 CET 2006
-// $Id$
+// $Id: OptAlignTestAnalyzer.cc,v 1.1 2006/01/26 13:44:15 case Exp $
 //
 //
 
@@ -64,4 +64,4 @@ using namespace std;
     std::cout << *myoa << std::endl;
 
   } //end of ::Analyze()
-  DEFINE_FWK_MODULE(OptAlignTestAnalyzer)
+DEFINE_FWK_MODULE(OptAlignTestAnalyzer);
